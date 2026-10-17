@@ -1,0 +1,18 @@
+{
+  "name": "anew-dreams",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Anew Moonbolt, Junior Sky-Car Engineer. A MERN portfolio for Baby's First Website (haX.baby).",
+  "scripts": {
+    "install:all": "npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm install --prefix client --include=dev && npm install --prefix server && npm run build --prefix client",
+    "start": "npm start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

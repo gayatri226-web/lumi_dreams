@@ -1,0 +1,16 @@
+# One-click Render deploy: Express serves the API and the built React app from one service.
+services:
+  - type: web
+    name: anew-dreams
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false

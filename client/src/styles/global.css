@@ -44,6 +44,8 @@ body.space .btn--ghost { color: var(--pink); border-color: var(--pink); }
 .pill { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 999px; border: 3px solid var(--fg); background: transparent; color: var(--fg); font-weight: 700; font-size: 16px; }
 .pill[aria-pressed="true"] { background: var(--pink); color: var(--ink); border-color: var(--pink); }
 
+/* Layout notes: see README. Colors are tokens on :root; space mode swaps them on body.space. */
+
 /* PRELOADER */
 .loader { position: fixed; inset: 0; z-index: 100; background: var(--night); color: var(--cream); overflow: hidden; }
 .loader canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -73,7 +75,7 @@ body.space .btn--ghost { color: var(--pink); border-color: var(--pink); }
 @keyframes hover { 50% { transform: translateY(-10px); } }
 
 /* PINK CRAWL TRANSITION */
-.crawl { position: fixed; inset: 0; z-index: 120; background: var(--pink-soft); overflow: hidden; display: grid; place-items: center; clip-path: circle(0% at 0% 50%); }
+.crawl { position: fixed; inset: 0; z-index: 120; background: var(--pink-soft); overflow: hidden; display: grid; place-items: center; }
 .crawl[hidden] { display: none !important; }
 .crawl::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle, #FFB3CF 3px, transparent 4px); background-size: 34px 34px; opacity: .7; }
 .crawl__text { position: relative; text-align: center; margin-top: -26vh; color: var(--pink-d); padding: 0 16px; }
@@ -131,7 +133,6 @@ body.rainbow .friend { animation: hop .5s ease-in-out infinite alternate; }
 body.rainbow .friend:nth-child(even) { animation-delay: .25s; }
 @keyframes hop { to { transform: translateY(-16px) rotate(-4deg); } }
 .parked { position: absolute; right: 3%; top: -46px; width: clamp(90px, 11vw, 150px); background: none; border: 0; padding: 0; z-index: 2; }
-.parked:hover { transform: rotate(-3deg) translateY(-3px); }
 .sheet { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 0; }
 .sheet div { background: var(--cream); color: var(--ink); border: 3px solid var(--ink); border-radius: 22px; padding: 14px 16px; min-width: 0; }
 body.space .sheet div { background: var(--night-2); color: var(--cream); border-color: var(--night-line); }
@@ -191,7 +192,7 @@ body.space .card { box-shadow: 0 8px 0 #05040F; }
 .countdown { position: absolute; inset: 0; display: grid; place-items: center; font-size: 140px; font-weight: 800; color: var(--pink); text-shadow: 0 6px 0 var(--pink-d); pointer-events: none; z-index: 3; }
 .shake { animation: shake .08s linear infinite; }
 @keyframes shake { 25% { transform: translate(2px, -1px); } 75% { transform: translate(-2px, 1px); } }
-.scenes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22vh; padding-block: 8vh 14vh; }
+.scenes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22vh; padding-block: 8vh 34vh; }
 .scene { background: rgba(35,30,74,.85); border: 3px solid var(--night-line); border-radius: 28px; padding: 22px 26px; transition: background-color .4s ease, color .4s ease, border-color .4s ease, transform .4s ease; backdrop-filter: blur(4px); }
 .scene.is-on { background: var(--cream); color: var(--ink); border-color: var(--pink); transform: scale(1.02); }
 .scene .label { color: var(--pink); }
@@ -287,3 +288,16 @@ body.chaos .ticker div { animation-duration: 7s; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   html { scroll-behavior: auto; }
 }
+
+/* React additions */
+.gb__status { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--soft); }
+.gb__status i { width: 10px; height: 10px; border-radius: 50%; background: #3FBF7F; display: inline-block; }
+.gb__status.off i { background: #E0A040; }
+.gb__error { color: #B3261E; font-weight: 700; font-size: 15px; margin: 0; }
+body.space .gb__error { color: #FFB4AB; }
+.reveal { will-change: transform, opacity; }
+.toast { transform: none; transition: none; }
+.story__sky { display: flex; flex-direction: column; }
+.story__sky .alt { position: static; text-align: left; display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.story__sky .alt strong { display: inline; font-size: 24px; }
+.story__sky svg { flex: 1; min-height: 0; height: auto; }
