@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      output: { manualChunks: { react: ['react', 'react-dom', 'react-router-dom'], motion: ['framer-motion', 'gsap', '@gsap/react'] } },
+      output: process.env.VITE_PREVIEW ? { inlineDynamicImports: true } : { manualChunks: { react: ['react', 'react-dom', 'react-router-dom'], motion: ['framer-motion', 'gsap', '@gsap/react'] } },
     },
   },
   server: {
