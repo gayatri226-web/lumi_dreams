@@ -4,6 +4,7 @@ import { useGSAP } from '@gsap/react';
 import { useApp } from '../../context/AppContext.jsx';
 import { Sound } from '../../lib/sound.js';
 import { speak } from '../../lib/voice.js';
+import { getName } from '../../lib/chat.js';
 import { prefersReducedMotion } from '../../lib/util.js';
 import StarSky from '../fx/StarSky.jsx';
 import Lumi from '../art/Lumi.jsx';
@@ -21,9 +22,12 @@ export default function Preloader({ onEnter }) {
   const [typed, setTyped] = useState('');
   const leaving = useRef(false);
   const typer = useRef(0);
-  const line = visits > 1
-    ? `Welcome back, friend! That's visit number ${visits}. I kept your seat warm!`
-    : "Hi hi! I'm Lumi! Welcome to my little garage in the sky!";
+  const name = getName();
+  const line = name
+    ? `Welcome back, ${name}! That's visit number ${visits}. I kept your seat warm!`
+    : visits > 1
+      ? `Welcome back, friend! That's visit number ${visits}. I kept your seat warm!`
+      : "Hi hi! I'm Lumi! Welcome to my little garage in the sky!";
 
   useEffect(() => () => clearInterval(typer.current), []);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,10 +13,12 @@ import Header from './components/layout/Header.jsx';
 import Footer from './components/layout/Footer.jsx';
 import { RainbowRocket, SparkleTrail, Toast } from './components/layout/Effects.jsx';
 import Home from './pages/Home.jsx';
-import Garage from './pages/Garage.jsx';
-import Journey from './pages/Journey.jsx';
-import Dreams from './pages/Dreams.jsx';
-import NotFound from './pages/NotFound.jsx';
+
+// Inner pages load on demand, which keeps the first load small and fast.
+const Garage = lazy(() => import('./pages/Garage.jsx'));
+const Journey = lazy(() => import('./pages/Journey.jsx'));
+const Dreams = lazy(() => import('./pages/Dreams.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -54,6 +56,13 @@ export default function App() {
     return () => clearTimeout(t);
   }, [pathname, hash, entered, talk]);
 
+  // Once the visitor is in, quietly fetch the other pages so the crawl transition never waits.
+  useEffect(() => {
+    if (!entered) return undefined;
+    const t = setTimeout(() => { import('./pages/Garage.jsx'); import('./pages/Journey.jsx'); import('./pages/Dreams.jsx'); import('./components/three/JourneyScene.jsx'); }, 2500);
+    return () => clearTimeout(t);
+  }, [entered]);
+
   const enter = () => {
     window.scrollTo(0, 0);
     setEntered(true);
@@ -67,6 +76,7 @@ export default function App() {
       {!entered && <Preloader onEnter={enter} />}
       <Header />
       <main>
+        <Suspense fallback={<div className="page-loading">Crawling over…</div>}>
         <Routes>
           <Route path="/" element={<Home entered={entered} />} />
           <Route path="/garage" element={<Garage />} />
@@ -74,6 +84,7 @@ export default function App() {
           <Route path="/dreams" element={<Dreams />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
       <Toast />

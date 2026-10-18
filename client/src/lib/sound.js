@@ -24,9 +24,22 @@ function audio() {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     ctx = new AC();
+    // Master chain: gain → gentle low-pass (takes the fizz off) → compressor (keeps levels even
+    // so nothing clips or gets lost) → speakers.
     master = ctx.createGain();
     master.gain.value = muted ? 0 : 0.9;
-    master.connect(ctx.destination);
+    const tone = ctx.createBiquadFilter();
+    tone.type = 'lowpass';
+    tone.frequency.value = 7000;
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -18;
+    comp.knee.value = 12;
+    comp.ratio.value = 4;
+    comp.attack.value = 0.004;
+    comp.release.value = 0.2;
+    master.connect(tone);
+    tone.connect(comp);
+    comp.connect(ctx.destination);
   }
   if (ctx.state !== 'running') ctx.resume().catch(() => {});
   return ctx;
@@ -113,7 +126,7 @@ export const Sound = {
   midi,
   note: (f, o) => tone(f, o),
   unlock: () => { gestured = true; return audio(); },
-  click: () => tone(950 + Math.random() * 200, { dur: 0.06, type: 'triangle', vol: 0.08 }),
+  click: () => tone(1100 + Math.random() * 120, { dur: 0.05, type: 'sine', vol: 0.06 }),
   pop: () => tone(520, { dur: 0.12, type: 'sine', vol: 0.12, to: 980 }),
   chime(m, when = 0) {
     tone(midi(m), { when, dur: 0.9, vol: 0.15 });
@@ -128,15 +141,15 @@ export const Sound = {
     tone(55, { dur: 2.8, type: 'sawtooth', vol: 0.09, to: 260 });
     noise({ dur: 2.8, from: 150, to: 4500, vol: 0.28 });
   },
-  beep: () => tone(880, { dur: 0.18, type: 'square', vol: 0.05 }),
+  beep: () => { tone(880, { dur: 0.22, type: 'triangle', vol: 0.12 }); tone(1760, { dur: 0.12, vol: 0.03 }); },
   pat: (i) => tone(i % 2 ? 330 : 392, { dur: 0.08, type: 'triangle', vol: 0.07 }),
   giggle() {
     [84, 86, 84, 88].forEach((m, i) => tone(midi(m), { when: i * 0.07, dur: 0.09, type: 'triangle', vol: 0.08 }));
   },
   whoosh: () => noise({ dur: 0.45, from: 600, to: 5000, vol: 0.15 }),
   honk() {
-    tone(392, { dur: 0.16, type: 'square', vol: 0.06 });
-    tone(494, { dur: 0.16, type: 'square', vol: 0.05 });
+    tone(392, { dur: 0.2, type: 'triangle', vol: 0.14 });
+    tone(494, { dur: 0.2, type: 'triangle', vol: 0.11 });
   },
   stamp: () => { noise({ dur: 0.12, from: 300, to: 150, vol: 0.35 }); tone(110, { dur: 0.15, vol: 0.2, to: 60 }); },
   thud: () => tone(140, { dur: 0.35, type: 'sine', vol: 0.2, to: 50 }),
