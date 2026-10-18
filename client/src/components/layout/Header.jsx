@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useApp } from '../../context/AppContext.jsx';
@@ -20,11 +20,34 @@ function Icon({ name }) {
 
 export function SoundButton({ className = 'round' }) {
   const { muted, setMuted } = useApp();
+  const [vol, setVol] = useState(Sound.volume);
   const toggle = () => { const next = !muted; setMuted(next); if (!next) Sound.pop(); };
+  // Press M anywhere (outside a text box) to mute or unmute instantly.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key.toLowerCase() !== 'm' || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target.closest('input, textarea, [contenteditable="true"]')) return;
+      setMuted(!Sound.muted);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [setMuted]);
+  const change = (e) => {
+    const v = Number(e.target.value) / 100;
+    setVol(v); Sound.setVolume(v);
+    if (v > 0 && muted) setMuted(false);
+    if (v === 0 && !muted) setMuted(true);
+  };
   return (
-    <button className={className} type="button" aria-pressed={!muted} aria-label={muted ? 'Turn sound on' : 'Turn sound off'} title={muted ? 'Sound off' : 'Sound on'} onClick={toggle} data-nosfx>
-      <Icon name={muted ? 'off' : 'on'} />
-    </button>
+    <div className="vol">
+      <button className={className} type="button" aria-pressed={!muted} aria-label={muted ? 'Turn sound on (M)' : 'Turn sound off (M)'} title={muted ? 'Sound off · press M' : 'Sound on · press M'} onClick={toggle} data-nosfx>
+        <Icon name={muted ? 'off' : 'on'} />
+      </button>
+      <label className="vol__pop">
+        <span className="sr-only">Volume</span>
+        <input type="range" min="0" max="100" step="5" value={muted ? 0 : Math.round(vol * 100)} onChange={change} onPointerUp={() => Sound.pop()} />
+      </label>
+    </div>
   );
 }
 

@@ -145,12 +145,10 @@ export default function Footer() {
             ))}
           </nav>
           <div className="webring">
-            <span className="label">Baby webring</span>
-            <div>
-              <a href="https://hax.baby/first-website" target="_blank" rel="noreferrer">← prev</a>
-              <a href="https://hax.baby" target="_blank" rel="noreferrer">★ haX.baby ★</a>
-              <a href="https://hax.baby/baby-problem" target="_blank" rel="noreferrer">next →</a>
-            </div>
+            <span className="label">Back to the clouds</span>
+            <button type="button" className="uprocket" onClick={() => { Sound.whoosh(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+              <span aria-hidden="true">🚀</span> Fly me to the top
+            </button>
           </div>
         </div>
 
@@ -162,11 +160,7 @@ export default function Footer() {
             <span className="b88">🚧 under<br />construction</span>
           </div>
           <button className="pill pill--light" type="button" aria-pressed={chaos} onClick={toggleChaos}>✺ Chaos mode</button>
-          <p className="credits">
-            Lumi and friends are original characters drawn in SVG for Baby's First Website (haX.baby). Built with React, Express and MongoDB.
-            Animation: GSAP + ScrollTrigger and Framer Motion. Voice: the Web Speech API. Every sound is synthesized live with the Web Audio API.
-            Confetti: canvas-confetti. Font: Baloo 2.
-          </p>
+          <p className="credits">Lumi Moonbolt · Junior Sky-Car Engineer · Cloudport, Sky Level 3. Every sound here is made live, just for you.</p>
         </div>
       </div>
       <div className="ticker" aria-hidden="true"><div>{TICKER.repeat(2)}&nbsp;</div></div>

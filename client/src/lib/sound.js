@@ -5,6 +5,7 @@ import { store } from './util.js';
 let ctx = null;
 let master = null;
 let muted = store.get('lumi-muted') === '1';
+let volume = Math.min(1, Math.max(0, parseFloat(store.get('lumi-vol') ?? '0.9') || 0.9));
 let gestured = false;
 const live = new Set();
 
@@ -27,7 +28,7 @@ function audio() {
     // Master chain: gain → gentle low-pass (takes the fizz off) → compressor (keeps levels even
     // so nothing clips or gets lost) → speakers.
     master = ctx.createGain();
-    master.gain.value = muted ? 0 : 0.9;
+    master.gain.value = muted ? 0 : volume;
     const tone = ctx.createBiquadFilter();
     tone.type = 'lowpass';
     tone.frequency.value = 7000;
@@ -167,11 +168,17 @@ export const Sound = {
   setMuted(m) {
     muted = m;
     store.set('lumi-muted', m ? '1' : '0');
-    if (master && ctx) master.gain.setTargetAtTime(m ? 0 : 0.9, ctx.currentTime, 0.02);
+    if (master && ctx) master.gain.setTargetAtTime(m ? 0 : volume, ctx.currentTime, 0.02);
     if (m) {
       live.forEach((n) => { try { n.stop(); } catch { /* already stopped */ } });
       live.clear();
     }
   },
+  setVolume(v) {
+    volume = Math.min(1, Math.max(0, v));
+    store.set('lumi-vol', String(volume));
+    if (master && ctx && !muted) master.gain.setTargetAtTime(volume, ctx.currentTime, 0.02);
+  },
+  get volume() { return volume; },
   get muted() { return muted; },
 };

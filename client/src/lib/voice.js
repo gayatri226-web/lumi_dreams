@@ -60,7 +60,7 @@ export async function speak(text, { pitch = 1.35, rate = 0.98 } = {}) {
     const neural = voice && /natural|neural|online|google/i.test(voice.name);
     u.pitch = neural ? Math.min(pitch, 1.25) : pitch;
     u.rate = rate;
-    u.volume = 1;
+    u.volume = Sound.volume;
     // Chrome can drop an utterance queued in the same tick as cancel(), so give it a beat.
     const go = () => { synth.speak(u); if (synth.paused) synth.resume(); };
     if (busy) setTimeout(go, 90); else go();

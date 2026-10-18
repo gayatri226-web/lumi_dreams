@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
+    assetsInlineLimit: process.env.VITE_PREVIEW ? 100000000 : 4096,
     rollupOptions: {
       output: process.env.VITE_PREVIEW ? { inlineDynamicImports: true } : { manualChunks: { react: ['react', 'react-dom', 'react-router-dom'], motion: ['framer-motion', 'gsap', '@gsap/react'] } },
     },
