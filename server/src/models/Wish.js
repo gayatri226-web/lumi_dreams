@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-// One guestbook entry: a visitor's name and their launch wish for Anew.
+// One guestbook entry: a visitor's name and their launch wish for Lumi.
 const wishSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, minlength: 1, maxlength: 24 },
