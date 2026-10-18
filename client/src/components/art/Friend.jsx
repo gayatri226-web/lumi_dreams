@@ -1,4 +1,4 @@
-// Anew's Cloudport friends. Same rounded body, a different topper each.
+// Lumi's Cloudport crew. Same rounded body, a different topper each.
 const INK = '#4A2C3A';
 
 const TOPPERS = {
@@ -16,12 +16,12 @@ const TOPPERS = {
 };
 
 export const FRIENDS = [
-  { id: 'puff', name: 'Puff, a cloud pup', color: '#CFE6FF' },
-  { id: 'bolt', name: 'Bolt, a tiny wrench bot', color: '#FFE38A' },
-  { id: 'comet', name: 'Comet, a sleepy fox', color: '#FFB3A0', sleepy: true },
-  { id: 'nib', name: 'Nib, a moon moth', color: '#E3D6FF' },
-  { id: 'pebble', name: 'Pebble, a mint turtle', color: '#C8F0DE', shell: true },
-  { id: 'fizz', name: 'Fizz, a soda sprite', color: '#FFD3E4' },
+  { id: 'puff', name: 'Puff, a cloud pup', job: 'Test pilot', color: '#CFE6FF' },
+  { id: 'bolt', name: 'Bolt, a tiny wrench bot', job: 'Holds the screws', color: '#FFE38A' },
+  { id: 'comet', name: 'Comet, a sleepy fox', job: 'Night delivery', color: '#FFB3A0', sleepy: true },
+  { id: 'nib', name: 'Nib, a moon moth', job: 'Headlight expert', color: '#E3D6FF' },
+  { id: 'pebble', name: 'Pebble, a mint turtle', job: 'Slow but safe', color: '#C8F0DE', shell: true },
+  { id: 'fizz', name: 'Fizz, a soda sprite', job: 'Fuel bubbles', color: '#FFD3E4' },
 ];
 
 export default function Friend({ id, name, color, sleepy, shell }) {

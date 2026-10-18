@@ -7,7 +7,7 @@ import { Sound } from '../../lib/sound.js';
 const STARS = [[70, 270], [130, 150], [220, 200], [290, 90], [370, 160], [420, 280]];
 
 export default function StarCharger() {
-  const { showToast, celebrate } = useApp();
+  const { showToast, celebrate, talk } = useApp();
   const [path, setPath] = useState([]);
   const pct = Math.round((path.length / STARS.length) * 100);
   const full = path.length === STARS.length;
@@ -18,8 +18,9 @@ export default function StarCharger() {
     setPath(next);
     Sound.chime(72 + next.length * 2);
     if (next.length === STARS.length) {
-      Sound.arpeggio([72, 76, 79, 84].map((m) => m), 0.1);
+      Sound.arpeggio([72, 76, 79, 84], 0.1);
       showToast('⚡ Star-Charger full. You named a new constellation!');
+      talk('Fully charged! Vroom vroom!');
       celebrate();
     }
   };
@@ -56,7 +57,7 @@ export default function StarCharger() {
       <div className="charge" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
       <div className="row">
         <span className="small" aria-live="polite">{full ? 'Charge: 100%. Car ready to fly!' : `Charge: ${pct}%`}</span>
-        <button className="btn btn--ghost" type="button" style={{ color: 'var(--ink)', borderColor: 'var(--ink)' }} onClick={() => setPath([])}>Clear sky</button>
+        <button className="btn btn--ghost btn--ink" type="button" onClick={() => setPath([])}>Clear sky</button>
       </div>
     </>
   );

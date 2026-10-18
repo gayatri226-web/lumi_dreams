@@ -2,7 +2,7 @@
   "name": "anew-dreams",
   "version": "1.0.0",
   "private": true,
-  "description": "Anew Moonbolt, Junior Sky-Car Engineer. A MERN portfolio for Baby's First Website (haX.baby).",
+  "description": "Lumi Moonbolt, Junior Sky-Car Engineer. A MERN portfolio for Baby's First Website (haX.baby).",
   "scripts": {
     "install:all": "npm install --prefix client && npm install --prefix server",
     "dev": "concurrently -n api,web -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",

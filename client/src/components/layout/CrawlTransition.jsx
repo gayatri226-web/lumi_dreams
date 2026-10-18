@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useApp } from '../context/AppContext.jsx';
-import { Sound } from '../lib/sound.js';
-import Crawler from './art/Crawler.jsx';
+import { useApp } from '../../context/AppContext.jsx';
+import { Sound } from '../../lib/sound.js';
+import Crawler from '../art/Crawler.jsx';
 
-// Between pages: a pink polka-dot screen wipes in, Anew crawls across leaving little hearts,
-// the page underneath changes while it's covered, then the screen wipes away.
+// Between pages: a pink polka-dot screen wipes in, Lumi crawls across leaving little hearts,
+// the page changes underneath while it's covered, then the screen wipes away.
 const COVER_MS = 1050;
 const TOTAL_MS = 1850;
 
@@ -51,13 +51,7 @@ function CrawlScreen({ label, midway, onDone }) {
         <h2>{label}</h2>
       </div>
       <div className="crawl__floor" />
-      <motion.div
-        ref={baby}
-        className="crawler"
-        initial={{ x: '-110%' }}
-        animate={{ x: '110vw' }}
-        transition={{ duration: 2.1, ease: 'linear' }}
-      >
+      <motion.div ref={baby} className="crawler" initial={{ x: '-110%' }} animate={{ x: '110vw' }} transition={{ duration: 2.1, ease: 'linear' }}>
         <Crawler style={{ width: '100%', display: 'block' }} />
       </motion.div>
     </motion.div>

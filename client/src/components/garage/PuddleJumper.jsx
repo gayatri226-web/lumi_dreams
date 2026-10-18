@@ -9,7 +9,7 @@ const W = 480, H = 360, CAR_X = 80;
 export default function PuddleJumper() {
   const canvas = useRef(null);
   const game = useRef({ on: false, y: 180, ty: 180, clouds: [], t: 0, dist: 0, spawn: 0 });
-  const [best, setBest] = useState(() => parseInt(store.get('anew-best', '0'), 10) || 0);
+  const [best, setBest] = useState(() => parseInt(store.get('lumi-best', '0'), 10) || 0);
   const [msg, setMsg] = useState(null);
   const [started, setStarted] = useState(false);
   const shake = useAnimationControls();
@@ -25,9 +25,10 @@ export default function PuddleJumper() {
       g.save(); g.translate(x, y);
       g.fillStyle = '#FFE38A'; g.beginPath(); g.ellipse(-36, 6, 10 + Math.random() * 4, 6, 0, 0, Math.PI * 2); g.fill();
       g.strokeStyle = '#4A2C3A'; g.lineWidth = 4;
-      g.fillStyle = 'rgba(207,230,255,.9)'; g.beginPath(); g.arc(4, -10, 15, Math.PI, 0); g.fill(); g.stroke();
-      g.fillStyle = '#FFF6E8'; g.beginPath(); g.arc(4, -13, 8, 0, Math.PI * 2); g.fill();
-      g.fillStyle = '#4A2C3A'; g.beginPath(); g.arc(2, -13, 1.6, 0, 7); g.arc(8, -13, 1.6, 0, 7); g.fill();
+      g.fillStyle = 'rgba(207,230,255,.9)'; g.beginPath(); g.arc(4, -10, 16, Math.PI, 0); g.fill(); g.stroke();
+      g.fillStyle = '#FF8FB8'; g.beginPath(); g.arc(4, -14, 10, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#FFF6E8'; g.beginPath(); g.arc(4, -12, 7, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#4A2C3A'; g.beginPath(); g.arc(1.5, -12, 1.8, 0, 7); g.arc(6.5, -12, 1.8, 0, 7); g.fill();
       g.fillStyle = '#FF8FB8'; g.beginPath();
       if (g.roundRect) g.roundRect(-30, -10, 64, 24, 12); else g.rect(-30, -10, 64, 24);
       g.fill(); g.stroke();
@@ -54,7 +55,7 @@ export default function PuddleJumper() {
     const crash = () => {
       s.on = false; draw(); Sound.thud();
       const d = Math.floor(s.dist);
-      if (d > bestRef.current) { bestRef.current = d; store.set('anew-best', String(d)); setBest(d); }
+      if (d > bestRef.current) { bestRef.current = d; store.set('lumi-best', String(d)); setBest(d); }
       setMsg(`Bonk! Into a cloud at ${d} m.`);
       shake.start({ x: [-6, 6, -3, 0], transition: { duration: 0.3 } });
     };

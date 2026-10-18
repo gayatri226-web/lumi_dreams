@@ -30,7 +30,7 @@ const SEED = [
   { _id: 'seed-2', name: 'The Moon', wish: 'Come visit soon. I have your spot ready.', createdAt: '2026-10-17T14:10:00Z' },
 ];
 const localWishes = () => {
-  try { return JSON.parse(store.get('anew-gb', 'null')) || SEED; } catch { return SEED; }
+  try { return JSON.parse(store.get('lumi-gb', 'null')) || SEED; } catch { return SEED; }
 };
 
 export async function getWishes() {
@@ -50,7 +50,7 @@ export async function addWish({ name, wish }) {
     // A validation or rate-limit answer from the server is a real error the visitor should see.
     if (err.status && err.status < 500) throw err;
     const entry = { _id: `local-${Date.now()}`, name, wish, createdAt: new Date().toISOString() };
-    store.set('anew-gb', JSON.stringify([entry, ...localWishes()].slice(0, 50)));
+    store.set('lumi-gb', JSON.stringify([entry, ...localWishes()].slice(0, 50)));
     return { entry, live: false };
   }
 }
@@ -58,13 +58,13 @@ export async function addWish({ name, wish }) {
 // Counts one visit per browser session, then reads the total.
 export async function getVisits() {
   let counted = false;
-  try { counted = sessionStorage.getItem('anew-counted') === '1'; } catch { /* ignore */ }
+  try { counted = sessionStorage.getItem('lumi-counted') === '1'; } catch { /* ignore */ }
   try {
     const data = counted ? await request('/visits') : await request('/visits', { method: 'POST' });
-    try { sessionStorage.setItem('anew-counted', '1'); } catch { /* ignore */ }
+    try { sessionStorage.setItem('lumi-counted', '1'); } catch { /* ignore */ }
     return { count: data.count, live: true };
   } catch {
-    const local = (parseInt(store.get('anew-visits', '0'), 10) || 0) + 1204;
+    const local = (parseInt(store.get('lumi-visits', '0'), 10) || 0) + 1204;
     return { count: local, live: false };
   }
 }

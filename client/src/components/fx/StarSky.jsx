@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { prefersReducedMotion } from '../lib/util.js';
+import { prefersReducedMotion } from '../../lib/util.js';
 
 // A realistic night sky on canvas: deep gradient, a pink-violet Milky Way band,
-// hundreds of tinted twinkling stars (the bright ones get a glow and spikes) and shooting stars.
-// The static layers are painted once to an offscreen canvas; only stars and meteors animate.
+// hundreds of tinted twinkling stars (bright ones get a glow and spikes) and shooting stars.
+// Static layers are painted once offscreen; only stars and meteors animate, and only while visible.
 const TINTS = ['255,255,255', '255,255,255', '255,255,255', '207,226,255', '255,236,210', '255,205,225'];
 const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
 
-export default function StarSky({ density = 1, className, id }) {
+export default function StarSky({ density = 1, className = 'starsky', id }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -22,7 +22,6 @@ export default function StarSky({ density = 1, className, id }) {
       if (!w || !h) return;
       canvas.width = w * dpr; canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
       bg = document.createElement('canvas');
       bg.width = w * dpr; bg.height = h * dpr;
       const b = bg.getContext('2d');
@@ -30,8 +29,6 @@ export default function StarSky({ density = 1, className, id }) {
       const base = b.createRadialGradient(w * 0.35, h * 0.25, 0, w * 0.5, h * 0.5, Math.max(w, h));
       base.addColorStop(0, '#221C4C'); base.addColorStop(0.55, '#120F2E'); base.addColorStop(1, '#07061A');
       b.fillStyle = base; b.fillRect(0, 0, w, h);
-
-      // Milky Way: soft colored clouds plus fine dust along a tilted band.
       b.save(); b.translate(w / 2, h / 2); b.rotate(-0.5);
       const L = Math.hypot(w, h);
       [['255,143,184', 0.08], ['170,150,255', 0.07], ['255,235,210', 0.05]].forEach(([col, a], k) => {
@@ -53,7 +50,6 @@ export default function StarSky({ density = 1, className, id }) {
         b.fillStyle = `rgba(255,255,255,${0.1 + Math.random() * 0.25})`;
         b.fillRect(Math.random() * w, Math.random() * h, 0.8, 0.8);
       }
-
       const n = Math.min(900, Math.floor(((w * h) / 1700) * density));
       stars = Array.from({ length: n }, () => {
         const big = Math.random() < 0.06;

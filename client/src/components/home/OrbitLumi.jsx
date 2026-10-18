@@ -1,35 +1,42 @@
 import { useEffect, useRef } from 'react';
-import { useApp } from '../context/AppContext.jsx';
-import { Sound } from '../lib/sound.js';
-import { pointOnEllipse, prefersReducedMotion } from '../lib/util.js';
-import { Antenna, BabyHead, BabyParts, Cheeks, Goggles, WaveArm } from './art/SvgDefs.jsx';
+import { useApp } from '../../context/AppContext.jsx';
+import { Sound } from '../../lib/sound.js';
+import { pointOnEllipse, prefersReducedMotion } from '../../lib/util.js';
+import Lumi, { LUMI_EYES } from '../art/Lumi.jsx';
+import Cloud from '../art/Cloud.jsx';
 
-const INK = '#4A2C3A';
-const EYES = [{ cx: 78, cy: 100 }, { cx: 122, cy: 100 }];
-
-// Little planets on tilted orbits around Anew. Ones on the far side pass behind the baby.
+// Big Lumi in the hero, standing on a cloud with little dream planets orbiting around.
+// Eyes follow the pointer (or wander on touch screens), Lumi blinks, and talks when clicked.
 const PLANETS = [
   { rx: 190, ry: 70, rot: -14, speed: 0.5, phase: 0, color: '#FF8FB8', mark: '' },
   { rx: 150, ry: 54, rot: 18, speed: -0.7, phase: 2, color: '#FFE38A', mark: '★' },
   { rx: 176, ry: 132, rot: 0, speed: 0.35, phase: 4, color: '#CFE6FF', mark: '' },
   { rx: 190, ry: 70, rot: -14, speed: 0.5, phase: 3.14, color: '#C8F0DE', mark: 'z' },
 ];
+const LINES = [
+  'Hehe! That tickles!',
+  'Did you know I can fix a sky-car with just a spoon?',
+  "My hood has cloud ears. They're for hearing dreams.",
+  'Boop! You found my belly star.',
+  "I'm two hundred and twelve days old. Practically an engineer.",
+  'Want to see my garage? Tap the Garage cloud!',
+];
 
-export default function BabyHero({ wave }) {
-  const { setSay } = useApp();
+export default function OrbitLumi({ entered }) {
+  const { talk, space } = useApp();
   const stage = useRef(null);
   const svg = useRef(null);
   const pupils = useRef([]);
   const planets = useRef([]);
+  const lineIdx = useRef(0);
 
-  // Eyes follow the pointer (or touch); they wander on their own when nobody is pointing.
   useEffect(() => {
-    let pointer = null, raf = 0, wander = 0;
+    let pointer = null, raf = 0, wander = 0, blinkT = 0;
     const look = (x, y) => {
       const el = svg.current; if (!el) return;
       const r = el.getBoundingClientRect(), s = r.width / 200;
-      EYES.forEach((eye, i) => {
-        const ex = r.left + eye.cx * s, ey = r.top + (eye.cy + 12) * s;
+      LUMI_EYES.forEach((eye, i) => {
+        const ex = r.left + eye.cx * s, ey = r.top + (eye.cy + 6) * s;
         const dx = x - ex, dy = y - ey, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 260);
         pupils.current[i]?.setAttribute('transform', `translate(${((dx / d) * 5 * k).toFixed(1)} ${((dy / d) * 5 * k).toFixed(1)})`);
       });
@@ -44,7 +51,6 @@ export default function BabyHero({ wave }) {
       wander += 0.9;
       look(r.left + r.width / 2 + Math.cos(wander) * 300, r.top + r.height / 2 + Math.sin(wander) * 140);
     }, 1300);
-    let blinkT;
     const blink = () => {
       blinkT = setTimeout(() => {
         svg.current?.classList.add('blink');
@@ -62,10 +68,8 @@ export default function BabyHero({ wave }) {
     };
   }, []);
 
-  // Orbiting planets.
   useEffect(() => {
     let raf = 0, t = 0;
-    const reduce = prefersReducedMotion();
     const place = () => {
       const box = stage.current?.clientWidth || 0;
       PLANETS.forEach((p, i) => {
@@ -78,20 +82,22 @@ export default function BabyHero({ wave }) {
     };
     const spin = () => { raf = requestAnimationFrame(spin); t += 0.016; place(); };
     place();
-    if (!reduce) raf = requestAnimationFrame(spin);
+    if (!prefersReducedMotion()) raf = requestAnimationFrame(spin);
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const doWave = () => {
+  const wave = () => {
     const el = svg.current; if (!el) return;
     el.classList.remove('waving'); void el.getBoundingClientRect(); el.classList.add('waving');
     setTimeout(() => el.classList.remove('waving'), 2200);
   };
-  useEffect(() => { if (wave) doWave(); }, [wave]);
+  useEffect(() => { if (entered) wave(); }, [entered]);
 
-  const onClick = (e) => {
-    if (e.target.id === 'antennaStar') { Sound.chime(91); setSay('Ding! My antenna picks up starlight.'); return; }
-    Sound.giggle(); setSay('Hehe! That tickles.'); doWave();
+  const onClick = () => {
+    Sound.giggle();
+    talk(LINES[lineIdx.current % LINES.length]);
+    lineIdx.current += 1;
+    wave();
   };
 
   return (
@@ -104,25 +110,10 @@ export default function BabyHero({ wave }) {
       {PLANETS.map((p, i) => (
         <span key={i} ref={(el) => { planets.current[i] = el; }} className="planet" aria-hidden="true" style={{ background: p.color }}>{p.mark}</span>
       ))}
-      <svg ref={svg} className="baby-hero" id="babyHero" viewBox="0 -12 200 252" role="img"
-        aria-label="Anew, a cute moon baby in pink pajamas with goggles and a star antenna, watching your cursor" onClick={onClick}>
-        <BabyParts />
-        <g id="antenna"><Antenna starProps={{ id: 'antennaStar' }} /></g>
-        <BabyHead />
-        {EYES.map((eye, i) => (
-          <g key={i}>
-            <g ref={(el) => { pupils.current[i] = el; }}>
-              <ellipse cx={eye.cx} cy={eye.cy} rx="11" ry="13" fill={INK} />
-              <circle cx={eye.cx + 4} cy={eye.cy - 5} r="4.5" fill="#fff" />
-              <circle cx={eye.cx - 3} cy={eye.cy + 5} r="2" fill="#fff" />
-            </g>
-            <rect className="lid" x={eye.cx - 14} y={eye.cy - 15} width="28" height="30" rx="12" fill="#FFF6E8" />
-          </g>
-        ))}
-        <Cheeks />
-        <g id="goggles"><Goggles /></g>
-        <g id="heroArm"><WaveArm /></g>
-      </svg>
+      <Cloud className="hero-cloud" />
+      <button className="lumi-btn" type="button" onClick={onClick} aria-label="Lumi, a moon baby in a pink cloud-ear hood. Click to hear Lumi talk." data-nosfx>
+        <Lumi svgRef={svg} className="lumi-hero" pupilRefs={pupils} helmet={space} />
+      </button>
     </div>
   );
 }

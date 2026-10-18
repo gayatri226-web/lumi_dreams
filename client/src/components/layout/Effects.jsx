@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useApp } from '../context/AppContext.jsx';
-import { prefersReducedMotion } from '../lib/util.js';
+import { useApp } from '../../context/AppContext.jsx';
+import { prefersReducedMotion } from '../../lib/util.js';
 
 // Small global layers: toast, the rainbow rocket, and the sparkle cursor trail.
 
@@ -11,7 +11,7 @@ export function Toast() {
     <div role="status" aria-live="polite">
       <AnimatePresence>
         {toast && (
-          <motion.div key={toast.id} className="toast on" style={{ x: '-50%' }}
+          <motion.div key={toast.id} className="toast" style={{ x: '-50%' }}
             initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 26 }}>
             {toast.text}
@@ -49,7 +49,7 @@ export function RainbowRocket() {
 const SPARK_COLORS = ['#FF8FB8', '#FFE38A', '#CFE6FF', '#E3D6FF', '#C93D78'];
 export function SparkleTrail() {
   useEffect(() => {
-    if (prefersReducedMotion()) return undefined;
+    if (prefersReducedMotion() || !window.matchMedia('(pointer: fine)').matches) return undefined;
     let last = 0;
     const onMove = (e) => {
       const now = performance.now();
