@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -38,6 +39,8 @@ function Odometer({ value }) {
 
 export default function Footer() {
   const { chaos, setChaos, showToast, celebrate, goTo, setMusic, music, addStamp } = useApp();
+  const { pathname } = useLocation();
+  const compact = pathname === "/journey" || pathname === "/origin";
   const root = useRef(null);
   const cradle = useRef(null);
   const played = useRef([]);
@@ -52,10 +55,10 @@ export default function Footer() {
 
   // The cradle rocks gently; the moon rises as the footer scrolls into view.
   useGSAP(() => {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || compact || !cradle.current) return;
     gsap.to(cradle.current, { rotation: 6, duration: 2.4, yoyo: true, repeat: -1, ease: 'sine.inOut', transformOrigin: '50% 0%' });
     gsap.from('.cradle-wrap', { y: 160, opacity: 0, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'top 45%', scrub: true } });
-  }, { scope: root });
+  }, { scope: root, dependencies: [compact], revertOnUpdate: true });
 
   const play = (k, i) => {
     Sound.chime(k.m);
@@ -86,6 +89,25 @@ export default function Footer() {
     setChaos(on);
     if (on) { showToast('✺ CHAOS MODE ✺ welcome to 1999'); celebrate(); }
   };
+
+  // Space pages (Origin, Journey) get a slim footer so the 3D story keeps the whole stage.
+  if (compact) {
+    return (
+      <footer className="bedtime bedtime--mini" ref={root}>
+        <div className="wrap mini__in">
+          <span className="mini__brand">lumi<span>.dreams</span> · Cloudport Space Garage</span>
+          <nav className="mini__nav" aria-label="Footer">
+            {PAGES.map((p) => (
+              <a key={p.path} href={p.path} onClick={(e) => { e.preventDefault(); goTo(p.path, p.title); }}>{p.label}</a>
+            ))}
+          </nav>
+          <button type="button" className="uprocket" onClick={() => { Sound.whoosh(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            <span aria-hidden="true">🚀</span> Top
+          </button>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className="bedtime" ref={root}>
@@ -160,7 +182,7 @@ export default function Footer() {
             <span className="b88">🚧 under<br />construction</span>
           </div>
           <button className="pill pill--light" type="button" aria-pressed={chaos} onClick={toggleChaos}>✺ Chaos mode</button>
-          <p className="credits">Lumi Moonbolt · Junior Sky-Car Engineer · Cloudport, Sky Level 3. Every sound here is made live, just for you.</p>
+          <p className="credits">Lumi Moonbolt · Junior Space-Car Engineer · Cloudport Space Garage, Bay 3. Every sound here is made live, just for you.</p>
         </div>
       </div>
       <div className="ticker" aria-hidden="true"><div>{TICKER.repeat(2)}&nbsp;</div></div>

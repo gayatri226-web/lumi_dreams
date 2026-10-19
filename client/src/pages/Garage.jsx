@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext.jsx';
 import { prefersReducedMotion } from '../lib/util.js';
 import PageHero from '../components/fx/PageHero.jsx';
+import ChapterNext from '../components/story/ChapterNext.jsx';
 import PuddleJumper from '../components/garage/PuddleJumper.jsx';
 import StarCharger from '../components/garage/StarCharger.jsx';
 import CometCourier from '../components/garage/CometCourier.jsx';
@@ -27,7 +28,7 @@ export default function Garage() {
 
   return (
     <div ref={root}>
-      <PageHero kicker="What I do" title="The Sky-Car Garage" accent="Garage"
+      <PageHero kicker="Chapter 3 · What I build" title="The Sky-Car Garage" accent="Garage"
         text="Three machines I'm proud of. Every one of them works. Scroll to open the garage door, then take one for a spin."
         sign="Bay 3 · Lumi's" />
       <section className="section garage-section">
@@ -55,6 +56,7 @@ export default function Garage() {
         </div>
       </section>
       <GrowthChart />
+      <ChapterNext from="/garage" />
     </div>
   );
 }

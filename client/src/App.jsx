@@ -18,17 +18,24 @@ import Home from './pages/Home.jsx';
 // Inner pages load on demand, which keeps the first load small and fast.
 const Garage = lazy(() => import('./pages/Garage.jsx'));
 const Journey = lazy(() => import('./pages/Journey.jsx'));
+const Origin = lazy(() => import('./pages/Origin.jsx'));
 const Dreams = lazy(() => import('./pages/Dreams.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 const RoomBackground = lazy(() => import('./components/three/RoomBackground.jsx'));
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+// Some sections animate optional elements; don't warn in the console when one isn't on the page.
+gsap.config({ nullTargetWarn: false });
 
-const TITLES = { '/': 'Lumi · Junior Sky-Car Engineer', '/garage': 'The Garage · Lumi', '/journey': 'My journey · Lumi', '/dreams': 'Dreams · Lumi' };
+const TITLES = { '/origin': 'Where I come from · Lumi', '/': 'Lumi · Junior Space-Car Engineer', '/garage': 'The Garage · Lumi', '/journey': 'My journey · Lumi', '/dreams': 'Dreams · Lumi' };
 
 export default function App() {
   const { visits, talk } = useApp();
   const [entered, setEntered] = useState(false);
+  // The page behind the preloader is only built once the visitor starts the engine (or skips),
+  // so the first screen loads fast; the car's fly-in animation covers the build.
+  const [warm, setWarm] = useState(false);
+  const ready = warm || entered;
   const { pathname, hash } = useLocation();
   const greeted = useRef(new Set());
 
@@ -93,7 +100,7 @@ export default function App() {
   // Once the visitor is in, quietly fetch the other pages so the crawl transition never waits.
   useEffect(() => {
     if (!entered) return undefined;
-    const t = setTimeout(() => { import('./pages/Garage.jsx'); import('./pages/Journey.jsx'); import('./pages/Dreams.jsx'); import('./components/three/JourneyScene.jsx'); }, 2500);
+    const t = setTimeout(() => { import('./pages/Garage.jsx'); import('./pages/Journey.jsx'); import('./pages/Dreams.jsx'); import('./pages/Origin.jsx'); import('./components/three/JourneyScene.jsx'); }, 2500);
     return () => clearTimeout(t);
   }, [entered]);
 
@@ -105,23 +112,24 @@ export default function App() {
 
   return (
     <>
-      {entered && pathname !== '/journey' && <Suspense fallback={null}><RoomBackground /></Suspense>}
+      {entered && pathname !== '/journey' && pathname !== '/origin' && <Suspense fallback={null}><RoomBackground /></Suspense>}
       <StarSky id="spaceSky" className="starsky space-sky" density={0.9} />
       <CrawlTransition />
-      {!entered && <Preloader onEnter={enter} />}
+      {!entered && <Preloader onEnter={enter} onStart={() => setWarm(true)} />}
       <Header />
       <main>
-        <Suspense fallback={<div className="page-loading">Crawling over…</div>}>
+        {ready && <Suspense fallback={<div className="page-loading">Crawling over…</div>}>
         <Routes>
           <Route path="/" element={<Home entered={entered} />} />
+          <Route path="/origin" element={<Origin />} />
           <Route path="/garage" element={<Garage />} />
           <Route path="/journey" element={<Journey />} />
           <Route path="/dreams" element={<Dreams />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </Suspense>
+        </Suspense>}
       </main>
-      <Footer />
+      {ready && <Footer />}
       <Toast />
       <RainbowRocket />
       <SparkleTrail />

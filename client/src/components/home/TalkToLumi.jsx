@@ -59,18 +59,31 @@ export default function TalkToLumi() {
     model.current?.talk(1600);
   };
 
+  // Only download the 3D engine when this section is about to scroll into view (keeps first load fast).
+  const stageRef = useRef(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return undefined;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); io.disconnect(); } }, { rootMargin: '600px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <section className="section talk" id="talk">
       <div className="wrap">
         <div className="section__head">
-          <div><span className="label eyebrow">Tier 3 · 3D + chat</span><SplitTitle text="Spin me, then say hi" accent="hi" /></div>
+          <div><span className="label eyebrow">Say hi to me</span><SplitTitle text="Spin me, then say hi" accent="hi" /></div>
           <p>That's me in 3D! Drag to spin me around, tap to make me jump, and chat with me below. I'll remember your name.</p>
         </div>
         <div className="talk__grid">
-          <div className="talk__stage">
-            <Suspense fallback={<div className="talk__loading">Building 3D Lumi…</div>}>
-              <Lumi3D ref={model} onPoke={poke} className="talk__canvas" />
-            </Suspense>
+          <div className="talk__stage" ref={stageRef}>
+            {near ? (
+              <Suspense fallback={<div className="talk__loading">Building 3D Lumi…</div>}>
+                <Lumi3D ref={model} onPoke={poke} className="talk__canvas" />
+              </Suspense>
+            ) : <div className="talk__loading">3D Lumi is waking up…</div>}
             <span className="talk__hint">↔ drag to spin · tap to jump</span>
           </div>
           <div className="chat panel">

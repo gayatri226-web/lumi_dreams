@@ -17,9 +17,9 @@ const INTENTS = [
   { re: /\b(hi|hello|hey|hiya|namaste|yo)\b/i, replies: ["Hi hi, {name}! Want to hear about my sky-cars?", 'Hello, {name}! You found my little garage in the sky.', 'Hey {name}! Boop. That was a hello boop.'] },
   { re: /\bwho are you|what are you|your name\b/i, replies: ["I'm Lumi! A baby Moonling. I fell off the Moon and now I build flying cars in Cloudport."] },
   { re: /\b(how old|age|born)\b/i, replies: ["I'm two hundred and twelve days old. That's practically an engineer in moon years."] },
-  { re: /\b(what do you do|job|work|engineer|build)\b/i, replies: ['I build and fix sky-cars so sleepy creatures get home by bedtime. My favorite tool is a spoon.', 'Junior Sky-Car Engineer, reporting for duty! Bay 3 is mine.'] },
+  { re: /\b(what do you do|job|work|engineer|build)\b/i, replies: ['I build and fix sky-cars so sleepy creatures get home by bedtime. My favorite tool is a spoon.', 'Junior Space-Car Engineer, reporting for duty! Bay 3 is mine.', 'I build sky-cars, and now I\'m teaching them to fly to space. The Moonbolt-1 can reach the Moon!'] },
   { re: /\b(car|sky-?car|vroom|drive|fly)\b/i, replies: ['My sky-cars run on starlight! Try the Star-Charger in my garage.', 'Vroom vroom! My first car was a teacup. It flew sideways.'] },
-  { re: /\b(moon|space|rocket|star)\b/i, replies: ['The Moon is my home! I visit by rocket. Fly my journey page to come along.', 'Stars are just the Moon\'s nightlights. I count them before bed.'] },
+  { re: /\b(moon|space|rocket|star)\b/i, replies: ['The Moon is my home! I fly there in my sky-car, the Moonbolt-1. Come along on my journey page.', 'Stars are just the Moon\'s nightlights. I count them before bed.'] },
   { re: /\b(dream|wish|future)\b/i, replies: ['My biggest dream is a bridge between two stars, so nobody flies home alone.', 'I keep my dreams in orbit around my head. Catch one on my dreams page!'] },
   { re: /\b(color|colour)\b/i, replies: ['Pink! Obviously. Look at my hood.'] },
   { re: /\b(food|eat|hungry|snack|milk)\b/i, replies: ['Moon cheese and warm milk. Not together. Okay, sometimes together.'] },
@@ -31,7 +31,7 @@ const INTENTS = [
   { re: /\b(help|what can you|can you)\b/i, replies: ['You can ask me about my cars, the Moon, my dreams, or ask for a joke or a song. Or tell me your name!'] },
   { re: /\b(thank|thanks|ty)\b/i, replies: ["You're welcome, {name}! High five. Gentle one, my hands are small."] },
   { re: /\b(bye|see you|later|goodbye)\b/i, replies: ['Bye bye, {name}! Fly safe!'] },
-  { re: /\b(hackathon|judge|haX|hax)\b/i, replies: ['I was built in 48 hours for Baby\'s First Website! Please be gentle with my score.'] },
+  { re: /\b(hackathon|judge)\b/i, replies: ['I was built in one very busy weekend. Please be gentle with my score!'] },
 ];
 
 const FALLBACK = [

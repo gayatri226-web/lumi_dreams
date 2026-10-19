@@ -14,7 +14,7 @@ import { SoundButton } from './Header.jsx';
 // The arrival. Step 1: the visitor turns the key (this also unlocks sound and voice).
 // Step 2: Lumi's sky-car flies in, Lumi waves and says hi out loud while the starlight tank fills.
 // Step 3: "Launch" zooms the car away into the pink crawl transition.
-export default function Preloader({ onEnter }) {
+export default function Preloader({ onEnter, onStart }) {
   const { visits, crawlTo, muted } = useApp();
   const root = useRef(null);
   const [stage, setStage] = useState('idle'); // idle | arriving | ready
@@ -33,7 +33,7 @@ export default function Preloader({ onEnter }) {
 
   useGSAP(() => {
     if (prefersReducedMotion()) return;
-    gsap.from('.bigname span', { y: 90, opacity: 0, rotation: () => gsap.utils.random(-25, 25), duration: 0.8, stagger: 0.12, ease: 'back.out(2.2)' });
+    gsap.from('.bigname span', { y: 90, rotation: () => gsap.utils.random(-25, 25), duration: 0.8, stagger: 0.12, ease: 'back.out(2.2)' });
     gsap.to('.bigname span', { y: -8, duration: 1.3, yoyo: true, repeat: -1, stagger: 0.15, ease: 'sine.inOut', delay: 1.2 });
     gsap.from('.ignite-wrap', { scale: 0, opacity: 0, duration: 0.6, ease: 'back.out(2)', delay: 0.7 });
   }, { scope: root });
@@ -53,6 +53,7 @@ export default function Preloader({ onEnter }) {
     if (stage !== 'idle') return;
     Sound.unlock();
     Sound.engine();
+    onStart?.();
     setStage('arriving');
     const tank = { p: 0 };
     const q = gsap.utils.selector(root);

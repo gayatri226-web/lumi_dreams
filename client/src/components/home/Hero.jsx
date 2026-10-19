@@ -31,12 +31,12 @@ export default function Hero({ entered }) {
       <ParallaxClouds />
       <div className="wrap hero__grid">
         <div className="hero__text">
-          <span className="hero__badge label">Cloudport · Bay 3 · Open past bedtime</span>
+          <span className="hero__badge label">Chapter 1 · Meet Lumi · Cloudport Bay 3</span>
           <h1 aria-label="Hi! I'm Lumi.">{big('Hi!')}{' '}{big("I'm")}<br />{big('Lumi.', 'pinkt')}</h1>
-          <p className="lead">A baby Moonling and Junior Sky-Car Engineer. I build flying cars so the littlest creatures get to bed on time.</p>
+          <p className="lead">A baby Moonling and Junior Space-Car Engineer. I build flying sky-cars in Cloudport, and now I'm teaching them to fly all the way to the Moon.</p>
           <div className="hero__cta">
             <a className="btn" href="/garage" onClick={(e) => go(e, '/garage', 'The Sky-Car Garage')}>Visit my garage</a>
-            <a className="btn btn--ghost" href="/journey" onClick={(e) => go(e, '/journey', 'My space journey')}>Fly my story</a>
+            <a className="btn btn--ghost" href="/origin" onClick={(e) => go(e, '/origin', 'Where I come from')}>See where I come from</a>
           </div>
           <div className="speech" aria-live="polite">
             <AnimatePresence mode="wait">

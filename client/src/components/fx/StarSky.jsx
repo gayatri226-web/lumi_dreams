@@ -39,18 +39,18 @@ export default function StarSky({ density = 1, className = 'starsky', id }) {
           b.fillStyle = g; b.fillRect(x - r, y - r, r * 2, r * 2);
         }
       });
-      const dust = Math.min(9000, Math.floor((w * h) / 220));
+      const dust = Math.min(2600, Math.floor((w * h) / 600));
       for (let i = 0; i < dust; i++) {
         b.fillStyle = `rgba(255,255,255,${Math.random() * 0.22})`;
         b.fillRect((Math.random() - 0.5) * L, gauss() * h * 0.09, Math.random() * 1.2, Math.random() * 1.2);
       }
       b.restore();
-      const faint = Math.min(4000, (w * h) / 900);
+      const faint = Math.min(1400, (w * h) / 1600);
       for (let i = 0; i < faint; i++) {
         b.fillStyle = `rgba(255,255,255,${0.1 + Math.random() * 0.25})`;
         b.fillRect(Math.random() * w, Math.random() * h, 0.8, 0.8);
       }
-      const n = Math.min(900, Math.floor(((w * h) / 1700) * density));
+      const n = Math.min(500, Math.floor(((w * h) / 2600) * density));
       stars = Array.from({ length: n }, () => {
         const big = Math.random() < 0.06;
         return {
@@ -62,9 +62,15 @@ export default function StarSky({ density = 1, className = 'starsky', id }) {
       });
     }
 
+    // Only paint (and only build the star field) while the canvas is on screen and not faded out.
+    let shown = true, checks = 0, dirty = true;
     function frame() {
       raf = requestAnimationFrame(frame);
-      if (!visible || !bg || document.hidden) return;
+      if (!visible || document.hidden) return;
+      if (checks++ % 30 === 0) shown = parseFloat(getComputedStyle(canvas).opacity) > 0.02;
+      if (!shown) return;
+      if (dirty) { dirty = false; build(); }
+      if (!bg) return;
       t += 0.016;
       ctx.clearRect(0, 0, w, h);
       ctx.drawImage(bg, 0, 0, w, h);
@@ -94,9 +100,8 @@ export default function StarSky({ density = 1, className = 'starsky', id }) {
       }
     }
 
-    build();
     raf = requestAnimationFrame(frame);
-    const ro = new ResizeObserver(build);
+    const ro = new ResizeObserver(() => { dirty = true; });
     ro.observe(canvas);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
     io.observe(canvas);

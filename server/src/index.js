@@ -17,7 +17,8 @@ const clientDist = path.resolve(here, '../../client/dist');
 const app = express();
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use(cors({ origin: origins }));
+// CLIENT_ORIGIN is a comma-separated list of allowed site URLs; '*' allows any site.
+app.use(cors({ origin: origins.includes('*') ? true : origins }));
 app.use(express.json({ limit: '10kb' }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true, db: usingMongo ? 'mongo' : 'memory' }));

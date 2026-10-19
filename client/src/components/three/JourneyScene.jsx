@@ -6,11 +6,11 @@ import { useApp } from '../../context/AppContext.jsx';
 import { Sound } from '../../lib/sound.js';
 import { speak } from '../../lib/voice.js';
 import { SCENES } from '../../data/content.js';
-import { makeRocket } from './models.js';
+import { makeSkyCar } from './models.js';
 import { glowTexture, makeEarth, makeJupiter, makeLandingSite, makeMars, makeMoon, makeSaturn, makeSky, makeStreaks, makeSun } from './space.js';
 
 // The Journey: a pinned, scroll-driven Three.js flight through realistic space. Scrolling launches
-// Lumi's rocket from Cloudport (on top of a day/night Earth), flies past Mars, Jupiter and Saturn
+// Lumi's sky-car, the Moonbolt-1, from Cloudport (on top of a day/night Earth), flies past Mars, Jupiter and Saturn
 // through four story chapters, and lands on real moon ground with the Earth hanging in the sky.
 // Scroll position = flight progress.
 const E = new THREE.Vector3(0, 0, 0);
@@ -22,7 +22,7 @@ const N = dE.clone().multiplyScalar(0.28).add(new THREE.Vector3(0, 0.96, 0)).nor
 const L = M.clone().add(N.clone().multiplyScalar(R_MOON)); // landing point
 const AWAY = dE.clone().sub(N.clone().multiplyScalar(dE.dot(N))).normalize().negate();
 const LAUNCH_AT = 0.1, LAND_AT = 0.94;
-const ROCKET_S = 0.32, BASE = 0.95 * ROCKET_S;
+const CAR_S = 0.42, BASE = 0.46 * CAR_S;
 
 const CHAPTERS = [
   { from: 0.0, to: 0.08, side: 'right', kind: 'title' },
@@ -104,9 +104,9 @@ export default function JourneyScene() {
     flag.scale.setScalar(0.001);
     scene.add(flag);
 
-    // Rocket, with its cute colors kept true and a soft self-glow so it reads against black space.
-    const rocket = makeRocket();
-    rocket.root.scale.setScalar(ROCKET_S);
+    // Lumi's sky-car, with its cute colors kept true and a soft self-glow so it reads against black space.
+    const rocket = makeSkyCar();
+    rocket.root.scale.setScalar(CAR_S);
     rocket.root.traverse((o) => {
       if (o.material && o.material.isMeshToonMaterial) { o.material.emissive = o.material.color.clone(); o.material.emissiveIntensity = 0.28; o.material.toneMapped = false; }
     });
@@ -181,7 +181,17 @@ export default function JourneyScene() {
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
     io.observe(el);
     const up = new THREE.Vector3(0, 1, 0);
-    const q = new THREE.Quaternion(), qLand = new THREE.Quaternion().setFromUnitVectors(up, N), qId = new THREE.Quaternion();
+    // Orientation helpers: the car's nose is +z and its roof is +y.
+    const basisQ = (fwd, upv, out) => {
+      const z = fwd.clone().normalize();
+      const x = new THREE.Vector3().crossVectors(upv, z).normalize();
+      const y = new THREE.Vector3().crossVectors(z, x).normalize();
+      return out.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z));
+    };
+    const H0 = new THREE.Vector3(M.x, 0, M.z).normalize(); // heading towards the Moon
+    const q = new THREE.Quaternion(), qId = basisQ(H0, up, new THREE.Quaternion());
+    const qLand = basisQ(new THREE.Vector3().crossVectors(N, AWAY), N, new THREE.Quaternion());
+    const heading = new THREE.Vector3(), fwd = new THREE.Vector3();
     const clock = new THREE.Clock();
 
     const frame = () => {
@@ -199,24 +209,35 @@ export default function JourneyScene() {
       const rp = curve.getPointAt(u);
       rocket.root.position.copy(rp);
       const tan = curve.getTangentAt(Math.min(0.999, u));
-      q.setFromUnitVectors(up, tan);
+      // Fly nose-first, but keep the car's pitch gentle like a real car-plane (never nose-straight-up).
+      heading.set(tan.x, 0, tan.z);
+      const hl = heading.length();
+      heading.normalize().lerp(H0, 1 - smooth(clamp01((hl - 0.1) / 0.35))).normalize();
+      const pitch = Math.max(-0.38, Math.min(0.42, tan.y * 0.5));
+      fwd.copy(heading).multiplyScalar(Math.cos(pitch)).addScaledVector(up, Math.sin(pitch));
+      basisQ(fwd, up, q);
       const landBlend = smooth(clamp01((u - 0.82) / 0.16));
       const padBlend = 1 - smooth(clamp01(u / 0.05));
       rocket.root.quaternion.copy(q).slerp(qLand, landBlend);
       if (padBlend > 0) rocket.root.quaternion.slerp(qId, padBlend);
       const flying = u > 0.0015 && u < 0.997;
-      const thrust = flying ? (0.85 + Math.sin(t * 45) * 0.15) * (1 - landBlend * 0.6) : 0.04;
-      rocket.flame.scale.set(1, thrust, 1);
+      const thrust = flying ? (0.85 + Math.sin(t * 45) * 0.15) * (1 - landBlend * 0.75) * (1 - padBlend * 0.8) : 0.04;
+      rocket.flame.scale.set(1, 1, thrust);
       rocket.flame.visible = thrust > 0.06;
+      // Hover jets blaze for liftoff and touchdown, and idle softly in between.
+      const hover = flying ? Math.max(padBlend, landBlend, 0.25) : 0.15;
+      rocket.glows.forEach((g, gi) => { g.scale.set(1, 0.5 + hover * (0.9 + Math.sin(t * 30 + gi) * 0.1), 1); g.material.opacity = 0.35 + hover * 0.6; });
+      if (flying) rocket.root.rotateZ(Math.sin(t * 2.2) * 0.04);
 
       // Exhaust sparks while flying; big smoke billows right at liftoff.
       if (flying) {
         const spawn = u < 0.05 ? 3 : 1;
         for (let k = 0; k < spawn; k++) {
           const pt = parts[partIdx++ % parts.length];
-          const nozzle = tmpA.copy(tan).multiplyScalar(-BASE * 1.6);
+          const lift = u < 0.05;
+          const nozzle = lift ? tmpA.set(0, -BASE * 1.4, 0) : tmpA.copy(fwd).multiplyScalar(-CAR_S * 1.25);
           pt.s.position.copy(rp).add(nozzle);
-          pt.vel.copy(tan).multiplyScalar(-(pt.smoke ? 0.4 : 1.2)).add(tmpB.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(pt.smoke ? (u < 0.05 ? 1.4 : 0.3) : 0.35));
+          pt.vel.copy(lift ? up : fwd).multiplyScalar(-(pt.smoke ? 0.4 : 1.2)).add(tmpB.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(pt.smoke ? (u < 0.05 ? 1.4 : 0.3) : 0.35));
           pt.life = 1; pt.s.visible = true;
         }
       }
@@ -299,7 +320,7 @@ export default function JourneyScene() {
       fired.current.landed = true;
       Sound.arpeggio([72, 76, 79, 84, 88, 91], 0.09);
       celebrate();
-      talk('We landed on the Moon! Hi, Moon! I missed you!');
+      talk('Mission complete! Hi, Moon! I missed you!');
       addStamp('journey');
     }
   }, [p, celebrate, talk, addStamp]);
@@ -322,12 +343,12 @@ export default function JourneyScene() {
           {active.map((c) => (
             <motion.div key={`${c.kind}-${c.i ?? ''}`} className={`journey__card journey__card--${c.side} journey__card--${c.kind}`}
               initial={{ opacity: 0, y: 40, scale: 0.96, filter: 'blur(6px)' }} animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -30, filter: 'blur(6px)' }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              {c.kind === 'title' && (<><span className="label">My story · scroll to fly</span><h2>From moon crumb to engineer</h2><p>I fell off the Moon a long time ago. Today I'm flying back for a visit. Keep scrolling to launch!</p><span className="journey__scroll">Scroll ↓</span></>)}
+              {c.kind === 'title' && (<><span className="label">Chapter 4 · My big mission</span><h2>Moonbolt-1: Earth to Moon</h2><p>My first sky-car that can fly to space. Today's test flight: Cloudport to the Moon. Scroll to launch!</p><span className="journey__scroll">Scroll ↓</span></>)}
               {c.kind === 'liftoff' && (<h2 className="journey__big">3… 2… 1… Liftoff!</h2>)}
-              {c.kind === 'scene' && (<><span className="label">Chapter {c.i + 1} · {SCENES[c.i].km}</span><h3>{SCENES[c.i].title}</h3><p>{SCENES[c.i].copy}</p></>)}
-              {c.kind === 'approach' && (<><span className="label">Almost home</span><h3>There it is. The Moon!</h3><p>Same craters, same sleepy glow. Coming in to land… gently… gently…</p></>)}
-              {c.kind === 'landed' && (<><h2>We landed on the Moon!!</h2><p>Planting my pink flag. I'll be back at Cloudport by bedtime.</p>
-                <button className="btn" type="button" onClick={() => goTo('/dreams', 'The Dream Observatory')}>Visit my dream observatory →</button></>)}
+              {c.kind === 'scene' && (<><span className="label">Mission log {c.i + 1} · {SCENES[c.i].km} to go</span><h3>{SCENES[c.i].title}</h3><p>{SCENES[c.i].copy}</p></>)}
+              {c.kind === 'approach' && (<><span className="label">Almost home</span><h3>There it is. The Moon!</h3><p>My first home. Same craters, same sleepy glow. Hover jets on… gently… gently…</p></>)}
+              {c.kind === 'landed' && (<><h2>We landed on the Moon!!</h2><p>Mission complete. A sky-car built by a baby just flew to space. Planting my pink flag!</p>
+                <button className="btn" type="button" onClick={() => goTo('/dreams', 'The Dream Observatory')}>Chapter 5: What's next →</button></>)}
             </motion.div>
           ))}
         </AnimatePresence>

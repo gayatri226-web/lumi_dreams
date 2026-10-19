@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useApp } from '../context/AppContext.jsx';
+import ChapterNext from '../components/story/ChapterNext.jsx';
 
 // Journey: Lumi's story as a scroll-driven 3D flight from Earth to the Moon (Three.js, loaded lazily).
 // The whole page lives in space: the night theme switches on while you're here.
@@ -18,9 +19,10 @@ export default function Journey() {
   return (
     <>
       <h1 className="sr-only">Fly with Lumi to the Moon</h1>
-      <Suspense fallback={<div className="journey journey--loading"><p>Fueling the rocket…</p></div>}>
+      <Suspense fallback={<div className="journey journey--loading"><p>Fueling the Moonbolt-1…</p></div>}>
         <JourneyScene />
       </Suspense>
+      <ChapterNext from="/journey" />
     </>
   );
 }

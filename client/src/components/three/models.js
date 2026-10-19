@@ -12,7 +12,7 @@ export function toon(color, extra = {}) {
 }
 const inkMat = new THREE.MeshBasicMaterial({ color: INK, side: THREE.BackSide });
 
-function part(geo, mat, { pos = [0, 0, 0], rot = [0, 0, 0], scale = [1, 1, 1], outline = 0.045 } = {}) {
+export function part(geo, mat, { pos = [0, 0, 0], rot = [0, 0, 0], scale = [1, 1, 1], outline = 0.045 } = {}) {
   const g = new THREE.Group();
   const m = new THREE.Mesh(geo, mat);
   g.add(m);
@@ -129,4 +129,91 @@ export function makeRocket() {
   flame.add(outer, inner);
   g.add(flame);
   return { root: g, flame };
+}
+
+// Lumi's sky-car (the Moonbolt-1): a pink hover car with a glass bubble canopy, Lumi inside,
+// little wings, four glowing hover jets and a rear starlight thruster. Forward is +z.
+export function makeSkyCar({ withLumi = true } = {}) {
+  const PINK = toon(0xff8fb8), DEEP = toon(0xc93d78), LILAC = toon(0xe3d6ff), YEL = toon(0xffe38a), WHITE = toon(0xfff6e8);
+  const root = new THREE.Group();
+  const parts = {}; // named pieces so scenes can assemble the car piece by piece
+
+  const body = part(new THREE.CapsuleGeometry(0.55, 1.15, 10, 28), PINK, { rot: [Math.PI / 2, 0, 0], scale: [1.18, 1, 0.62], outline: 0.04 });
+  parts.body = body;
+  const skirt = part(new THREE.TorusGeometry(0.62, 0.11, 12, 40), DEEP, { pos: [0, -0.12, 0], rot: [Math.PI / 2, 0, 0], scale: [1.05, 1.7, 1], outline: 0 });
+  parts.skirt = skirt;
+  const stripe = part(new THREE.BoxGeometry(0.12, 0.05, 1.6), YEL, { pos: [0, 0.33, -0.15], outline: 0 });
+  parts.stripe = stripe;
+
+  // Canopy with Lumi inside.
+  const canopy = new THREE.Group();
+  canopy.position.set(0, 0.22, 0.12);
+  const glass = new THREE.Mesh(new THREE.SphereGeometry(0.56, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshPhysicalMaterial({ color: 0xcfe6ff, transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0, depthWrite: false }));
+  const rim = part(new THREE.TorusGeometry(0.56, 0.05, 10, 40), YEL, { rot: [Math.PI / 2, 0, 0], outline: 0 });
+  const shine = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.025, 6, 20, Math.PI * 0.5), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
+  shine.position.set(-0.1, 0.25, 0.25); shine.rotation.set(-0.4, 0.5, 1.9);
+  canopy.add(rim, glass, shine);
+  let lumi = null;
+  if (withLumi) {
+    lumi = makeLumi();
+    lumi.root.scale.setScalar(0.27);
+    lumi.root.position.set(0, 0.1, 0.02);
+    lumi.body.visible = false;
+    canopy.add(lumi.root);
+  }
+  parts.canopy = canopy;
+
+  // Wings and tail fin.
+  const wingShape = new THREE.Shape();
+  wingShape.moveTo(0, 0); wingShape.quadraticCurveTo(0.55, 0.05, 0.75, -0.22); wingShape.lineTo(0.62, -0.32); wingShape.quadraticCurveTo(0.3, -0.22, 0, -0.3); wingShape.closePath();
+  const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.07, bevelEnabled: true, bevelSize: 0.02, bevelThickness: 0.02, bevelSegments: 2 });
+  const wings = new THREE.Group();
+  [-1, 1].forEach((sx) => {
+    const w = part(wingGeo, LILAC, { pos: [sx * 0.6, 0.02, -0.1], rot: [Math.PI / 2, 0, sx > 0 ? 0 : Math.PI], scale: [1, 1, 1], outline: 0.06 });
+    w.rotation.y = sx * 0.18;
+    wings.add(w);
+  });
+  parts.wings = wings;
+  const finShape = new THREE.Shape();
+  finShape.moveTo(0, 0); finShape.lineTo(0.12, 0.5); finShape.lineTo(0.38, 0.52); finShape.lineTo(0.42, 0); finShape.closePath();
+  const fin = part(new THREE.ExtrudeGeometry(finShape, { depth: 0.06, bevelEnabled: false }), DEEP, { pos: [0.03, 0.18, -0.95], rot: [0, -Math.PI / 2, 0], outline: 0.06 });
+  parts.fin = fin;
+
+  // Headlights, antenna.
+  const lights = new THREE.Group();
+  const lampMat = new THREE.MeshBasicMaterial({ color: 0xfff3b0 });
+  [-1, 1].forEach((sx) => { const l = new THREE.Mesh(new THREE.SphereGeometry(0.09, 14, 10), lampMat); l.position.set(sx * 0.32, 0.02, 1.05); lights.add(l); });
+  const antenna = new THREE.Group();
+  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.42, 6), new THREE.MeshBasicMaterial({ color: 0x4a2c3a }));
+  stick.position.y = 0.21;
+  const ball = part(new THREE.SphereGeometry(0.07, 12, 8), YEL, { pos: [0, 0.44, 0], outline: 0.08 });
+  antenna.add(stick, ball);
+  antenna.position.set(0.2, 0.28, -0.62); antenna.rotation.z = -0.25;
+  parts.lights = lights; parts.antenna = antenna;
+
+  // Hover jets underneath, and the rear thruster.
+  const jets = new THREE.Group();
+  const glowMat = new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+  const glows = [];
+  [[-0.45, 0.6], [0.45, 0.6], [-0.45, -0.6], [0.45, -0.6]].forEach(([x, z]) => {
+    const pod = part(new THREE.CylinderGeometry(0.13, 0.16, 0.16, 18), WHITE, { pos: [x, -0.36, z], outline: 0.08 });
+    const g = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.42, 16, 1, true), glowMat.clone());
+    g.position.set(x, -0.62, z); g.rotation.x = Math.PI;
+    jets.add(pod, g); glows.push(g);
+  });
+  parts.jets = jets;
+  const thruster = part(new THREE.CylinderGeometry(0.2, 0.26, 0.28, 20), LILAC, { pos: [0, 0, -1.02], rot: [Math.PI / 2, 0, 0], outline: 0.06 });
+  parts.thruster = thruster;
+  const flame = new THREE.Group();
+  flame.position.set(0, 0, -1.16);
+  const outer = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.9, 20, 1, true), new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+  outer.rotation.x = -Math.PI / 2; outer.position.z = -0.45;
+  const inner = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.55, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff3b0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+  inner.rotation.x = -Math.PI / 2; inner.position.z = -0.28;
+  flame.add(outer, inner);
+
+  Object.values(parts).forEach((p) => root.add(p));
+  root.add(flame);
+  return { root, flame, glows, parts, lumi };
 }
