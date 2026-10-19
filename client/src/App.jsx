@@ -97,6 +97,15 @@ export default function App() {
     return () => clearTimeout(t);
   }, [pathname, entered]);
 
+  // Re-measure every scroll animation once fonts and late content have settled.
+  useEffect(() => {
+    const refresh = () => ScrollTrigger.refresh();
+    document.fonts?.ready.then(refresh);
+    window.addEventListener('load', refresh);
+    const t = setTimeout(refresh, 1500);
+    return () => { window.removeEventListener('load', refresh); clearTimeout(t); };
+  }, [pathname, ready]);
+
   // Once the visitor is in, quietly fetch the other pages so the crawl transition never waits.
   useEffect(() => {
     if (!entered) return undefined;

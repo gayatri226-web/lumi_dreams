@@ -22,14 +22,15 @@ export default function Garage() {
 
   useGSAP(() => {
     if (prefersReducedMotion()) { gsap.set('.garage__door', { display: 'none' }); return; }
-    gsap.to('.garage__door', { yPercent: -101, ease: 'none', scrollTrigger: { trigger: '.garage', start: 'top 78%', end: 'top 12%', scrub: 0.5 } });
+    // The door rolls all the way up once, as the garage comes into view (never stuck half-open).
+    gsap.to('.garage__door', { yPercent: -101, duration: 1.3, ease: 'power3.inOut', scrollTrigger: { trigger: '.garage', start: 'top 70%', once: true } });
     gsap.from('.garage .card', { y: 90, opacity: 0, stagger: 0.12, duration: 0.8, ease: 'back.out(1.5)', scrollTrigger: { trigger: '.garage', start: 'top 40%', once: true } });
   }, { scope: root });
 
   return (
     <div ref={root}>
       <PageHero kicker="Chapter 3 · What I build" title="The Sky-Car Garage" accent="Garage"
-        text="Three machines I'm proud of. Every one of them works. Scroll to open the garage door, then take one for a spin."
+        text="Three machines I'm proud of. Every one of them works. The garage door opens as you scroll down. Then take one for a spin!"
         sign="Bay 3 · Lumi's" />
       <section className="section garage-section">
         <div className="wrap">
