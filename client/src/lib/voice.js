@@ -49,7 +49,7 @@ export const voiceName = () => voice?.name ?? '';
 
 const isChild = (v) => v && /\bana\b|\bivy\b|child|kid|junior/i.test(v.name);
 
-export async function speak(text, { pitch = 1.75, rate = 1.04 } = {}) {
+export async function speak(text, { pitch = 1.4, rate = 1.0 } = {}) {
   if (!supported || Sound.muted || !text) return;
   await voicesReady();
   if (Sound.muted) return;
@@ -61,8 +61,8 @@ export async function speak(text, { pitch = 1.75, rate = 1.04 } = {}) {
     if (voice) { u.voice = voice; u.lang = voice.lang; }
     // A real child voice needs only a touch of lift; any other voice gets the full baby pitch,
     // a little less for neural voices so they stay clear rather than chipmunky.
-    const neural = voice && /natural|neural|online/i.test(voice.name);
-    u.pitch = isChild(voice) ? Math.min(pitch, 1.2) : neural ? Math.min(pitch, 1.55) : Math.min(2, pitch);
+    const neural = voice && /natural|neural|online|google/i.test(voice.name);
+    u.pitch = isChild(voice) ? 1.1 : neural ? Math.min(pitch, 1.3) : Math.min(pitch, 1.45);
     u.rate = isChild(voice) ? rate * 0.96 : rate;
     u.volume = Sound.volume;
     // Chrome can drop an utterance queued in the same tick as cancel(), so give it a beat.

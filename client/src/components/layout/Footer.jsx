@@ -177,12 +177,10 @@ export default function Footer() {
         <div className="bedtime__bottom">
           <div className="badges" aria-hidden="true">
             <span className="b88">best viewed<br />past bedtime</span>
-            <span className="b88 b88--pink">made with<br />♥ &amp; gsap</span>
-            <span className="b88 b88--night">mern<br />powered</span>
             <span className="b88">🚧 under<br />construction</span>
           </div>
           <button className="pill pill--light" type="button" aria-pressed={chaos} onClick={toggleChaos}>✺ Chaos mode</button>
-          <p className="credits">Lumi Moonbolt · Junior Space-Car Engineer · Cloudport Space Garage, Bay 3. Every sound here is made live, just for you.</p>
+          <p className="credits">Lumi Moonbolt · Junior Space-Car Engineer · Cloudport Space Garage, Bay 3. Made with love, for little dreamers.</p>
         </div>
       </div>
       <div className="ticker" aria-hidden="true"><div>{TICKER.repeat(2)}&nbsp;</div></div>
